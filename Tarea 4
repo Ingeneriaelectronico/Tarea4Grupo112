@@ -1,0 +1,3 @@
+from abc import ABC, abstractmethod # Importa herramientas para crear clases abstractas.
+import logging                      # Librería para registrar errores y eventos en un archivo.
+from datetime import datetime       # Manejo de fechas y horas.
