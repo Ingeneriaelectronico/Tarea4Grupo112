@@ -1,0 +1,28 @@
+# CONFIGURACIÓN DE LOGS
+logging.basicConfig(
+    filename="Software_FL.log",    # Nombre del archivo donde se guardarán los logs.
+    level=logging.ERROR,
+    format="%(asctime)s - %(levelname)s - %(message)s" # Formato de cada línea en el log.
+)
+
+# EXCEPCIONES PERSONALIZADAS
+class SistemaError(Exception):       # Clase base para errores del sistema.
+    pass
+
+class ClienteError(SistemaError):    # Error específico para clientes.
+    pass
+
+class ServicioError(SistemaError):   # Error específico para servicios.
+    pass
+
+class ReservaError(SistemaError):    # Error específico para reservas.
+    pass
+
+# CLASE ABSTRACTA BASE
+class Entidad(ABC):           # Clase abstracta que sirve como modelo general.
+    def __init__(self, id):
+        self._id = id         # Identificador único de la entidad.
+
+    @abstractmethod
+    def mostrar_info(self):   # Método abstracto que obliga a las clases hijas a implementarlo.
+        pass
