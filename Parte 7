@@ -1,0 +1,28 @@
+def simular():
+    operaciones = []
+
+    try:
+        c1 = Cliente("Elkin", "correo@mail.com")
+        c2 = Cliente("", "malcorreo")  # ERROR
+
+        s1 = ReservaSala("Sala VIP", 50)
+        s2 = AlquilerEquipo("Proyector", 20)
+        s3 = Asesoria("Consultoría", 100)
+
+        r1 = Reserva(c1, s1, 2)
+        r2 = Reserva(c1, s2, 5)
+        r3 = Reserva(c1, s3, -1)  # ERROR
+
+        operaciones.extend([r1, r2, r3])
+
+        for r in operaciones:
+            try:
+                print(r.procesar())
+            except Exception as e:
+                log_error(str(e))
+
+    except Exception as e:
+        log_error(str(e))
+    finally:
+        print("Sistema sigue funcionando")
+``
