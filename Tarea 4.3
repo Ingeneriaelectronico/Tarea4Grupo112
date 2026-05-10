@@ -1,0 +1,38 @@
+# SERVICIO ABSTRACTO
+class Servicio(ABC):             # Clase abstracta para servicios.
+    def __init__(self, nombre, tarifa_base):
+        self.nombre = nombre
+        self.tarifa_base = tarifa_base
+
+    @abstractmethod
+    def calcular_costo(self, *args, **kwargs): # Método abstracto para calcular costo.
+        pass
+
+    @abstractmethod
+    def descripcion(self):      # Método abstracto para descripción. Permite sobrecarga simulada.
+        pass
+
+# SERVICIOS CON POLIMORFISMO
+class ServicioSala(Servicio):
+    def calcular_costo(self, horas=1, impuesto=0):
+        costo = self.tarifa_base * horas # Costo por hora
+        return costo + (costo * impuesto)# Aplica Impuesto
+
+    def descripcion(self):
+        return "Reserva de sala por horas"
+
+class ServicioEquipo(Servicio):
+    def calcular_costo(self, dias=1, descuento=0):
+        costo = self.tarifa_base * dias
+        return costo - (costo * descuento) # Aplica descuento
+
+    def descripcion(self):
+        return "Alquiler de equipos"
+
+class ServicioAsesoria(Servicio):
+    def calcular_costo(self, sesiones=1, impuesto=0):
+        costo = self.tarifa_base * sesiones
+        return costo + (costo * impuesto)
+
+    def descripcion(self):
+        return "Asesoría especializada"
