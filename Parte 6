@@ -1,0 +1,40 @@
+# RESERVA
+class Reserva:
+    def __init__(self, cliente, servicio, duracion):
+        self.cliente = cliente
+        self.servicio = servicio
+        self.duracion = duracion
+        self.estado = "PENDIENTE"
+
+    def confirmar(self):
+        try:
+            if self.duracion <= 0:
+                raise ReservaError("Duración inválida")
+
+            self.estado = "CONFIRMADA"
+            return "Reserva confirmada"
+
+        except Exception as e:  # Manejo de error
+            logging.error("Error al confirmar reserva", exc_info=True) # Guarda error con detalle completo.
+            raise ReservaError("Fallo en confirmación") from e
+
+    def cancelar(self):
+        try:
+            self.estado = "CANCELADA"
+            return "Reserva cancelada"
+
+        except Exception as e:
+            logging.error("Error al cancelar", exc_info=True)
+
+    def procesar_pago(self):
+        try:
+            if self.estado != "CONFIRMADA":
+                raise ReservaError("No se puede pagar una reserva no confirmada")
+
+            costo = self.servicio.calcular_costo(self.duracion) # Llama al método polimórfico.
+            return f"Pago procesado: {costo}"
+
+        except Exception as e:
+            logging.error("Error en pago", exc_info=True)
+            raise
+
