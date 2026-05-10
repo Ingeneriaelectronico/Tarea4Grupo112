@@ -1,0 +1,15 @@
+def mostrar_ultimos_errores(n=10):
+    try:
+        with open("Software_FL.log", "r") as f:
+            lineas = f.readlines()   # Lee todas las líneas del log
+            # Si hay menos de n líneas, muestra todas
+            ultimos = lineas[-n:] if len(lineas) >= n else lineas
+            print("Últimos errores registrados:")
+            for linea in ultimos:
+                print(linea.strip())  # strip() elimina saltos de línea extra
+    except FileNotFoundError:
+        print("El archivo de logs no existe todavía.")
+# EJECUCIÓN
+if __name__ == "__main__":
+    simulacion()
+    mostrar_ultimos_errores()
