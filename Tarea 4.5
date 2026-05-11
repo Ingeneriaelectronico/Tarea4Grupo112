@@ -1,0 +1,88 @@
+SISTEMA PRINCIPAL
+class SistemaFJ:
+    def __init__(self):
+        # Almacenamiento en memoria (sin BD).
+        self.clientes = []
+        self.servicios = []
+        self.reservas = []
+
+    def agregar_cliente(self, cliente): # Agrega clinetes
+        try:
+            self.clientes.append(cliente)
+        except Exception as e:
+            logging.error("Error agregando cliente", exc_info=True)
+
+    def agregar_servicio(self, servicio): # Agrega servicios
+        try:
+            self.servicios.append(servicio)
+        except Exception as e:
+            logging.error("Error agregando servicio", exc_info=True)
+
+    def crear_reserva(self, cliente, servicio, duracion):
+        try:
+            reserva = Reserva(cliente, servicio, duracion) # Se crea reserva
+            self.reservas.append(reserva)
+            return reserva
+
+        except Exception as e:
+            logging.error("Error creando reserva", exc_info=True)
+
+# SIMULACIÓN DE OPERACIONES
+def simulacion():
+    sistema = SistemaFJ()
+
+    try:
+        # Clientes válidos
+        c1 = Cliente(1, "Juan Perez", "juan@email.com") 
+        c2 = Cliente(2, "Ana Lopez", "ana@email.com")
+
+        sistema.agregar_cliente(c1)
+        sistema.agregar_cliente(c2)
+
+        # Cliente inválido
+        try:
+            c3 = Cliente(3, "A", "correo_invalido") # Genera excepción → se captura.
+        except ClienteError as e:
+            logging.error(e)
+
+        # Servicios
+        s1 = ServicioSala("Sala VIP", 50)
+        s2 = ServicioEquipo("Laptop", 30)
+        s3 = ServicioAsesoria("Consultoría", 100)
+
+        sistema.agregar_servicio(s1)
+        sistema.agregar_servicio(s2)
+        sistema.agregar_servicio(s3)
+
+        # Reservas válidas
+        r1 = sistema.crear_reserva(c1, s1, 2)
+        print(r1.confirmar())
+        print(r1.procesar_pago())
+
+        # Reserva inválida (duración negativa)
+        try:
+            r2 = sistema.crear_reserva(c2, s2, -1)
+            print(r2.confirmar())
+        except Exception as e:
+            logging.error(e)
+
+        # Pago sin confirmar
+        try:
+            r3 = sistema.crear_reserva(c2, s3, 1)
+            print(r3.procesar_pago())
+        except Exception as e:
+            logging.error(e)
+
+        # Cancelación
+        r1.cancelar()
+
+        # Más pruebas, Simulación de operaciones
+        for i in range(10):
+            try:
+                r = sistema.crear_reserva(c1, s1, i)
+                print(r.confirmar())
+            except Exception as e:
+                logging.error(e)
+
+    finally:
+        print("Simulación finalizada")
