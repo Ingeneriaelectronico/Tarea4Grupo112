@@ -1,0 +1,263 @@
+#------Parte 1 Octavio------
+
+from abc import ABC, abstractmethod # Importa herramientas para crear clases abstractas.
+import logging                      # Librería para registrar errores y eventos en un archivo.
+from datetime import datetime       # Manejo de fechas y horas.
+
+#------Parte 2 Juan ------- 
+
+# CONFIGURACIÓN DE LOGS
+logging.basicConfig(
+    filename="Software_FL.log",    # Nombre del archivo donde se guardarán los logs.
+    level=logging.ERROR,
+    format="%(asctime)s - %(levelname)s - %(message)s" # Formato de cada línea en el log.
+)
+
+# EXCEPCIONES PERSONALIZADAS
+class SistemaError(Exception):       # Clase base para errores del sistema.
+    pass
+
+class ClienteError(SistemaError):    # Error específico para clientes.
+    pass
+
+class ServicioError(SistemaError):   # Error específico para servicios.
+    pass
+
+class ReservaError(SistemaError):    # Error específico para reservas.
+    pass
+
+# CLASE ABSTRACTA BASE
+class Entidad(ABC):           # Clase abstracta que sirve como modelo general.
+    def __init__(self, id):
+        self._id = id         # Identificador único de la entidad.
+
+    @abstractmethod
+    def mostrar_info(self):   # Método abstracto que obliga a las clases hijas a implementarlo.
+        pass
+
+#------Parte 3 Hernan -----
+
+# CLIENTE
+class Cliente(Entidad):          # Clase Clienteh hereda de Entidad.
+    def __init__(self, id, nombre, email):
+        super().__init__(id)     # Llama al constructor de Entidad.
+        self.nombre = nombre     # Usa el setter (validación automática) de nombre.
+        self.email = email       # Usa el setter (validación automática) de email.
+
+    @property
+    def nombre(self):            # Metodo de nombre.
+        return self._nombre
+
+    @nombre.setter
+    def nombre(self, valor):     # Setter con validación.
+        if not valor or len(valor) < 3:
+            raise ClienteError("Nombre inválido")
+        self._nombre = valor
+
+    @property
+    def email(self):             # Getter de email.
+        return self._email
+
+    @email.setter
+    def email(self, valor):      # Setter con validación.
+        if "@" not in valor:
+            raise ClienteError("Email inválido")
+        self._email = valor
+
+    def mostrar_info(self):      # Implementación del método abstracto.
+        return f"Cliente: {self.nombre} - {self.email}"
+
+#------Parte 4 Octavio -----
+
+# SERVICIO ABSTRACTO
+class Servicio(ABC):             # Clase abstracta para servicios.
+    def __init__(self, nombre, tarifa_base):
+        self.nombre = nombre
+        self.tarifa_base = tarifa_base
+
+    @abstractmethod
+    def calcular_costo(self, *args, **kwargs): # Método abstracto para calcular costo.
+        pass
+
+    @abstractmethod
+    def descripcion(self):      # Método abstracto para descripción. Permite sobrecarga simulada.
+        pass
+#------Parte 5 Juan -----
+
+# SERVICIOS CON POLIMORFISMO
+class ServicioSala(Servicio):
+    def calcular_costo(self, horas=1, impuesto=0):
+        costo = self.tarifa_base * horas # Costo por hora
+        return costo + (costo * impuesto)# Aplica Impuesto
+
+    def descripcion(self):
+        return "Reserva de sala por horas"
+
+class ServicioEquipo(Servicio):
+    def calcular_costo(self, dias=1, descuento=0):
+        costo = self.tarifa_base * dias
+        return costo - (costo * descuento) # Aplica descuento
+
+    def descripcion(self):
+        return "Alquiler de equipos"
+
+class ServicioAsesoria(Servicio):
+    def calcular_costo(self, sesiones=1, impuesto=0):
+        costo = self.tarifa_base * sesiones
+        return costo + (costo * impuesto)
+
+    def descripcion(self):
+        return "Asesoría especializada"
+
+#------Parte 6 Hernan -----
+
+# RESERVA
+class Reserva:
+    def __init__(self, cliente, servicio, duracion):
+        self.cliente = cliente
+        self.servicio = servicio
+        self.duracion = duracion
+        self.estado = "PENDIENTE"
+
+    def confirmar(self):
+        try:
+            if self.duracion <= 0:
+                raise ReservaError("Duración inválida")
+
+            self.estado = "CONFIRMADA"
+            return "Reserva confirmada"
+
+        except Exception as e:  # Manejo de error
+            logging.error("Error al confirmar reserva", exc_info=True) # Guarda error con detalle completo.
+            raise ReservaError("Fallo en confirmación") from e
+
+    def cancelar(self):
+        try:
+            self.estado = "CANCELADA"
+            return "Reserva cancelada"
+
+        except Exception as e:
+            logging.error("Error al cancelar", exc_info=True)
+
+    def procesar_pago(self):
+        try:
+            if self.estado != "CONFIRMADA":
+                raise ReservaError("No se puede pagar una reserva no confirmada")
+
+            costo = self.servicio.calcular_costo(self.duracion) # Llama al método polimórfico.
+            return f"Pago procesado: {costo}"
+
+        except Exception as e:
+            logging.error("Error en pago", exc_info=True)
+            raise
+
+#------Parte 7 Octavio -----
+
+# SISTEMA PRINCIPAL
+class SistemaFJ:
+    def __init__(self):
+        # Almacenamiento en memoria (sin BD).
+        self.clientes = []
+        self.servicios = []
+        self.reservas = []
+
+    def agregar_cliente(self, cliente): # Agrega clinetes
+        try:
+            self.clientes.append(cliente)
+        except Exception as e:
+            logging.error("Error agregando cliente", exc_info=True)
+
+    def agregar_servicio(self, servicio): # Agrega servicios
+        try:
+            self.servicios.append(servicio)
+        except Exception as e:
+            logging.error("Error agregando servicio", exc_info=True)
+
+    def crear_reserva(self, cliente, servicio, duracion):
+        try:
+            reserva = Reserva(cliente, servicio, duracion) # Se crea reserva
+            self.reservas.append(reserva)
+            return reserva
+
+        except Exception as e:
+            logging.error("Error creando reserva", exc_info=True)
+
+#------Parte 8 Juna -----
+
+# SIMULACIÓN DE OPERACIONES
+def simulacion():
+    sistema = SistemaFJ()
+
+    try:
+        # Clientes válidos
+        c1 = Cliente(1, "Juan Perez", "juan@email.com") 
+        c2 = Cliente(2, "Ana Lopez", "ana@email.com")
+
+        sistema.agregar_cliente(c1)
+        sistema.agregar_cliente(c2)
+
+        # Cliente inválido
+        try:
+            c3 = Cliente(3, "A", "correo_invalido") # Genera excepción → se captura.
+        except ClienteError as e:
+            logging.error(e)
+
+        # Servicios
+        s1 = ServicioSala("Sala VIP", 50)
+        s2 = ServicioEquipo("Laptop", 30)
+        s3 = ServicioAsesoria("Consultoría", 100)
+
+        sistema.agregar_servicio(s1)
+        sistema.agregar_servicio(s2)
+        sistema.agregar_servicio(s3)
+
+        # Reservas válidas
+        r1 = sistema.crear_reserva(c1, s1, 2)
+        print(r1.confirmar())
+        print(r1.procesar_pago())
+
+        # Reserva inválida (duración negativa)
+        try:
+            r2 = sistema.crear_reserva(c2, s2, -1)
+            print(r2.confirmar())
+        except Exception as e:
+            logging.error(e)
+
+        # Pago sin confirmar
+        try:
+            r3 = sistema.crear_reserva(c2, s3, 1)
+            print(r3.procesar_pago())
+        except Exception as e:
+            logging.error(e)
+
+        # Cancelación
+        r1.cancelar()
+
+        # Más pruebas, Simulación de operaciones
+        for i in range(10):
+            try:
+                r = sistema.crear_reserva(c1, s1, i)
+                print(r.confirmar())
+            except Exception as e:
+                logging.error(e)
+
+    finally:
+        print("Simulación finalizada")
+
+#------Parte 9 Hrenan -----
+
+def mostrar_ultimos_errores(n=10):
+    try:
+        with open("Software_FL.log", "r") as f:
+            lineas = f.readlines()   # Lee todas las líneas del log
+            # Si hay menos de n líneas, muestra todas
+            ultimos = lineas[-n:] if len(lineas) >= n else lineas
+            print("Últimos errores registrados:")
+            for linea in ultimos:
+                print(linea.strip())  # strip() elimina saltos de línea extra
+    except FileNotFoundError:
+        print("El archivo de logs no existe todavía.")
+# EJECUCIÓN
+if __name__ == "__main__":
+    simulacion()
+    mostrar_ultimos_errores()
